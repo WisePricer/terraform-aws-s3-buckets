@@ -33,30 +33,36 @@ module "enabled" {
   value   = "${var.enabled}"
 }
 
-/*
-module "label" {
-  source        = "devops-workflow/label/local"
-  version       = "0.1.3"
-  organization  = "${var.organization}"
-  name          = "${var.name}"
+module "labels" {
+  source        = "devops-workflow/labels/null"
+  version       = "0.1.0"
+  attributes    = "${var.attributes}"
+  component     = "${var.component}"
+  delimiter     = "${var.delimiter}"
+  enabled       = "${module.enabled.value}"
+  environment   = "${var.environment}"
+  monitor       = "${var.monitor}"
+  names         = "${var.names}"
   namespace-env = "${var.namespace-env}"
   namespace-org = "${var.namespace-org}"
-  environment   = "${var.environment}"
-  delimiter     = "${var.delimiter}"
-  attributes    = "${var.attributes}"
+  organization  = "${var.organization}"
+  owner         = "${var.owner}"
+  product       = "${var.product}"
+  service       = "${var.service}"
   tags          = "${var.tags}"
+  team          = "${var.team}"
 }
-*/
 
 resource "aws_s3_bucket" "this" {
   count = "${module.enabled.value ? length(var.names) : 0}"
-  bucket = "${var.namespaced ?
-   format("%s-%s-%s", var.org, var.environment, replace(element(var.names, count.index), "_", "-")) :
-   format("%s-%s", var.org, replace(element(var.names, count.index), "_", "-"))}"
-  acl = "${var.public ? "public-read" : "private"}"
+
+  bucket = "${module.labels.id[count.index]}"
+  acl    = "${var.public ? "public-read" : "private"}"
+
   versioning {
     enabled = "${var.versioned}"
   }
+
   #acceleration_status
   #force_destroy = true
   #lifecycle_rule {}
@@ -67,13 +73,7 @@ resource "aws_s3_bucket" "this" {
   #region
   #request_payer
   #replication_configuration {}
-  tags = "${ merge(
-    var.tags,
-    map("Name", var.namespaced ?
-     format("%s-%s", var.environment, replace(element(var.names, count.index), "_", "-")) :
-     format("%s", replace(element(var.names, count.index), "_", "-")) ),
-    map("Environment", var.environment),
-    map("Terraform", "true") )}"
+  tags = "${module.labels.tags[count.index]}"
 }
 
 /*
@@ -93,7 +93,9 @@ resource "aws_s3_bucket_policy" "bucket_policy" {
 }
 */
 
+
 #resource "aws_s3_bucket_notification"
+
 
 /*
 resource "aws_s3_bucket_object" "this" {
@@ -104,3 +106,4 @@ resource "aws_s3_bucket_object" "this" {
   etag    = "${md5(file("${lookup(var.files, element(keys(var.files), count.index))}"))}"
 }
 */
+
