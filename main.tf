@@ -26,16 +26,12 @@
 # https://www.terraform.io/docs/providers/aws/r/aws_s3_bucket_object.html
 
 module "enabled" {
-  #source  = "devops-workflow/boolean/local"
-  #version = "0.1.1"
-  #source  = "git::https://github.com/WisePricer/terraform-local-boolean.git?ref=tags/v0.1.1"
-  source  = "git::https://github.com/WisePricer/terraform-local-boolean.git"
+  source  = "git::https://github.com/WiserSolutions/terraform-local-boolean.git"
   value   = "${var.enabled}"
 }
 
 module "labels" {
-  source        = "devops-workflow/labels/null"
-  version       = "0.1.0"
+  source        = "git::https://github.com/WiserSolutions/terraform-null-labels.git"
   attributes    = "${var.attributes}"
   component     = "${var.component}"
   delimiter     = "${var.delimiter}"
@@ -106,4 +102,3 @@ resource "aws_s3_bucket_object" "this" {
   etag    = "${md5(file("${lookup(var.files, element(keys(var.files), count.index))}"))}"
 }
 */
-
